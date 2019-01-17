@@ -122,7 +122,11 @@ db_query <- function(sql, db, ..., output_format = getOption('dbr.output_format'
             output_format,
             'data.table' = data.table::setDT(result_set),
             'tibble' = tibble::as_tibble(result_set),
-            stop('Unsupported output_format -- please use data.frame, data.table or tibble.'))
+            try(do.call(output_format, result_set),
+                warning = function(w){warning("Warning(s) when applied", output_format, "to result_set:\n ", w)},
+                error = function(e){stop("Error when applied", output_format, "to result_set:\n ", e)}
+            )
+        )
     }
 
     result_set
